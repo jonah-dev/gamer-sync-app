@@ -13,7 +13,15 @@ export default {
       return stub.fetch(request);
     }
 
-    // Let Pages handle everything else
-    return fetch(request);
+    // If static assets are bound to this Worker, serve them.
+    if (env.ASSETS && typeof env.ASSETS.fetch === "function") {
+      return env.ASSETS.fetch(request);
+    }
+
+    // Standalone API Worker fallback.
+    return new Response("Game Selector API is running. Open your Cloudflare Pages URL for the frontend.", {
+      status: 200,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
   },
 };
