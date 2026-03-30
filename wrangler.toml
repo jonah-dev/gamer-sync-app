@@ -1,0 +1,19 @@
+name = "game-selector-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GamesDurableObject"]
+
+[[durable_objects.bindings]]
+name = "GAMES"
+class_name = "GamesDurableObject"
+
+# For local development
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# For production on Cloudflare Pages
+[env.production]
+vars = { ENVIRONMENT = "production" }

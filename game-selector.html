@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Selector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .user-id {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .games-section {
+            margin-bottom: 30px;
+        }
+
+        .games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 40px;
+        }
+
+        .game-item {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .game-row:hover {
+            background: #f0f1f5;
+        }
+
+        .game-name {
+            min-width: 100px;
+            font-weight: 500;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        .vote-bar {
+            flex: 1;
+            height: 24px;
+            background: #e9ecef;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            margin: 0 8px;
+        }
+
+        .vote-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 30px;
+        }
+
+        .vote-count {
+            position: absolute;
+            left: 8px;
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .vote-button {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            font-size: 18px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: white;
+            border: 2px solid #ddd;
+            transition: all 0.2s;
+        }
+
+        .vote-button:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .vote-button.voted-up {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .vote-button.voted-down {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        .delete-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            font-size: 18px;
+            border-radius: 8px;
+            background: white;
+            border: 2px solid #ddd;
+            color: #999;
+            flex-shrink: 0;
+        }
+
+        .delete-btn:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .spinner {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+            display: none;
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        .spinner svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .spin-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-bottom: 20px;
+        }
+
+        .spin-button:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+        }
+
+        .spin-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .result {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            font-size: 1.2em;
+            color: #999;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .result p {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .connection-status.connected {
+            background: #51cf66;
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: #ff6b6b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Game Selector</h1>
+        <div class="user-id" id="userId"></div>
+
+        <div class="input-section">
+            <input type="text" id="gameInput" placeholder="Add a game..." />
+            <button onclick="addGame()">Add</button>
+        </div>
+
+        <div class="games-section">
+            <div class="games-list" id="gamesList">
+                <div class="empty-state">Loading...</div>
+            </div>
+        </div>
+
+        <div class="spinner" id="spinner">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#f0f0f0" stroke-width="2" />
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#667eea" stroke-width="8"
+                        stroke-dasharray="0 2000" stroke-linecap="round" style="animation: spin 2s linear infinite;" />
+                <circle cx="100" cy="100" r="70" fill="white" stroke="#ddd" stroke-width="2" />
+            </svg>
+            <style>
+                @keyframes spin {
+                    from { stroke-dasharray: 0 2000; }
+                    to { stroke-dasharray: 2000 2000; }
+                }
+            </style>
+        </div>
+
+        <button class="spin-button" id="spinBtn" onclick="spinWheel()" disabled>
+            Spin the Wheel! 🎡
+        </button>
+
+        <div class="result" id="result">
+            <h2>You should play:</h2>
+            <p id="selectedGame"></p>
+            <div class="button-group">
+                <button onclick="spinWheel()">Spin Again</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="connection-status disconnected" id="status">Connecting...</div>
+
+    <script>
+        let games = [];
+        let gameVotes = {};
+        let userId;
+        let ws;
+        let apiUrl = new URL(location.href).origin;
+
+        // Generate or load user ID
+        function initUserId() {
+            let stored = localStorage.getItem('userId');
+            if (!stored) {
+                stored = Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', stored);
+            }
+            userId = stored;
+            document.getElementById('userId').textContent = `You: ${userId}`;
+        }
+
+        function connect() {
+            const wsUrl = (apiUrl.startsWith('https') ? 'wss://' : 'ws://') + apiUrl.split('//')[1] + '/api/games';
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                updateStatus(true);
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'update') {
+                    games = msg.data.games;
+                    gameVotes = {};
+                    games.forEach((game) => {
+                        gameVotes[game.id] = game.votes;
+                    });
+                    renderGames();
+                }
+            };
+
+            ws.onclose = () => {
+                updateStatus(false);
+                setTimeout(connect, 3000);
+            };
+
+            ws.onerror = () => {
+                updateStatus(false);
+            };
+        }
+
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            if (connected) {
+                status.textContent = '🟢 Connected';
+                status.className = 'connection-status connected';
+            } else {
+                status.textContent = '🔴 Disconnected';
+                status.className = 'connection-status disconnected';
+            }
+        }
+
+        function addGame() {
+            const input = document.getElementById('gameInput');
+            const name = input.value.trim();
+
+            if (!name) return;
+
+            ws.send(JSON.stringify({ type: 'addGame', name }));
+            input.value = '';
+            input.focus();
+        }
+
+        function removeGame(gameId) {
+            ws.send(JSON.stringify({ type: 'removeGame', gameId }));
+        }
+
+        function vote(gameId, value) {
+            const currentVote = gameVotes[gameId]?.[userId] || 0;
+            const newValue = currentVote === value ? 0 : value;
+            ws.send(JSON.stringify({ type: 'vote', gameId, userId, value: newValue }));
+        }
+
+        function getVoteScore(gameId) {
+            const votes = gameVotes[gameId] || {};
+            return Object.values(votes).reduce((sum, v) => sum + v, 0);
+        }
+
+        function renderGames() {
+            const list = document.getElementById('gamesList');
+            const spinBtn = document.getElementById('spinBtn');
+
+            if (games.length === 0) {
+                list.innerHTML = '<div class="empty-state">Add some games to get started!</div>';
+                spinBtn.disabled = true;
+                return;
+            }
+
+            spinBtn.disabled = false;
+            list.innerHTML = games
+                .map((game) => {
+                    const votes = gameVotes[game.id] || {};
+                    const score = Object.values(votes).reduce((sum, v) => sum + v, 0);
+                    const myVote = votes[userId] || 0;
+                    const maxScore = Math.max(...games.map(g => Object.values(gameVotes[g.id] || {}).reduce((a, b) => a + b, 0)), 1);
+                    const barWidth = Math.max(((score + maxScore) / (2 * maxScore)) * 100, 5);
+
+                    return `
+                        <div class="game-item">
+                            <div class="game-row">
+                                <div class="game-name">${game.name}</div>
+                                <div class="vote-bar">
+                                    <div class="vote-fill" style="width: ${barWidth}%">
+                                        ${score > 0 ? `+${score}` : score}
+                                    </div>
+                                    ${score <= 0 ? `<span class="vote-count">${score}</span>` : ''}
+                                </div>
+                                <button class="vote-button ${myVote === 1 ? 'voted-up' : ''}"
+                                        onclick="vote(${game.id}, 1)"
+                                        title="I'd play this">👍</button>
+                                <button class="vote-button ${myVote === -1 ? 'voted-down' : ''}"
+                                        onclick="vote(${game.id}, -1)"
+                                        title="Not feeling it">👎</button>
+                                <button class="delete-btn" onclick="removeGame(${game.id})" title="Remove game">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                })
+                .join('');
+        }
+
+        function spinWheel() {
+            if (games.length === 0) return;
+
+            const spinner = document.getElementById('spinner');
+            const result = document.getElementById('result');
+            const spinBtn = document.getElementById('spinBtn');
+
+            spinner.classList.add('active');
+            result.classList.remove('active');
+            spinBtn.disabled = true;
+
+            // Weight by votes: games with more upvotes more likely to be selected
+            const weighted = [];
+            games.forEach((game) => {
+                const score = getVoteScore(game.id);
+                const weight = Math.max(score + games.length / 2, 1); // Ensure positive weight
+                for (let i = 0; i < weight; i++) {
+                    weighted.push(game);
+                }
+            });
+
+            setTimeout(() => {
+                const selected = weighted[Math.floor(Math.random() * weighted.length)];
+                document.getElementById('selectedGame').textContent = selected.name;
+                spinner.classList.remove('active');
+                result.classList.add('active');
+                spinBtn.disabled = false;
+            }, 2000);
+        }
+
+        // Allow Enter key to add game
+        document.getElementById('gameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addGame();
+        });
+
+        // Initialize
+        initUserId();
+        connect();
+    </script>
+</body>
+</html>

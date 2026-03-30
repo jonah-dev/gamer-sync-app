@@ -1,0 +1,11 @@
+{
+  "name": "gamer-sync",
+  "version": "1.0.0",
+  "description": "A collaborative game selector for Cloudflare Pages",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {}
+}
