@@ -12,8 +12,8 @@ class_name = "GamesDurableObject"
 
 # For local development
 [env.development]
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", SSO_MODE = "off", ALLOWED_EMAIL_DOMAIN = "", ALLOWED_EMAILS = "" }
 
 # For production on Cloudflare Pages
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", SSO_MODE = "off", ALLOWED_EMAIL_DOMAIN = "", ALLOWED_EMAILS = "" }

@@ -50,6 +50,19 @@ let apiUrl = 'https://game-selector-api.yourdomain.workers.dev';
 
 Upload `game-selector.html` to your Cloudflare Pages site (or just commit it if auto-deploying from GitHub).
 
+### Step 5: Optional SSO hardening with Cloudflare Access
+
+The Worker now supports Access-based SSO checks for API and WebSocket traffic.
+
+1. In Cloudflare Zero Trust, create an Access application that protects your Worker/API hostname.
+2. Add policies for approved users/groups.
+3. Set `SSO_MODE = "access"` in Worker environment variables (Wrangler env or dashboard).
+4. Optional restrictions:
+    - `ALLOWED_EMAIL_DOMAIN` (for example `yourcompany.com`)
+    - `ALLOWED_EMAILS` (comma-separated allowlist)
+
+When SSO mode is enabled, requests without an Access identity are rejected.
+
 ## Local Development
 
 ```bash

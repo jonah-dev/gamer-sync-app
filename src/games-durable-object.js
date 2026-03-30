@@ -5,6 +5,7 @@ export class GamesDurableObject {
     this.games = [];
     this.votes = {}; // gameId -> { userId -> vote value }
     this.clients = new Set();
+    this.clientIdentities = new Map();
   }
 
   async fetch(request) {
@@ -34,7 +35,9 @@ export class GamesDurableObject {
 
     if (method === "POST" && url.pathname === "/api/vote") {
       const body = await request.json();
-      return this.vote(body.gameId, body.userId, body.value);
+      const identity = request.headers.get("x-user-email");
+      const voterId = identity || body.userId;
+      return this.vote(body.gameId, voterId, body.value);
     }
 
     return new Response("Not found", { status: 404 });
@@ -42,20 +45,24 @@ export class GamesDurableObject {
 
   handleWebSocket(request) {
     const { 0: client, 1: server } = new WebSocketPair();
+    const identity = request.headers.get("x-user-email");
 
     this.clients.add(server);
+    this.clientIdentities.set(server, identity || null);
 
     server.accept();
     server.addEventListener("close", () => {
       this.clients.delete(server);
+      this.clientIdentities.delete(server);
     });
 
     server.addEventListener("message", async (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === "vote") {
-        await this.vote(data.gameId, data.userId, data.value);
-        this.broadcast();
+        const socketIdentity = this.clientIdentities.get(server);
+        const voterId = socketIdentity || data.userId;
+        await this.vote(data.gameId, voterId, data.value);
       } else if (data.type === "addGame") {
         await this.addGameDirect(data.name);
         this.broadcast();
@@ -67,6 +74,9 @@ export class GamesDurableObject {
 
     // Send initial state
     this.loadState().then(() => {
+      if (identity) {
+        server.send(JSON.stringify({ type: "identity", userId: identity }));
+      }
       server.send(JSON.stringify({ type: "update", data: this.getStateData() }));
     });
 
@@ -135,6 +145,13 @@ export class GamesDurableObject {
   }
 
   async vote(gameId, userId, value) {
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Missing user identity" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     await this.loadState();
     if (!this.votes[gameId]) {
       this.votes[gameId] = {};

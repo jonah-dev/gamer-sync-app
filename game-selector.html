@@ -45,6 +45,58 @@
             font-family: monospace;
         }
 
+        .view-header {
+            margin-bottom: 20px;
+        }
+
+        .quick-summary {
+            background: #f3f5ff;
+            border: 1px solid #d9dffb;
+            border-radius: 10px;
+            color: #3b4ab3;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #eef1f7;
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            color: #555;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .tab-btn:hover {
+            background: #e2e8f7;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
         .input-section {
             display: flex;
             gap: 10px;
@@ -87,6 +139,67 @@
 
         .games-section {
             margin-bottom: 30px;
+        }
+
+        .preferences-view {
+            margin-bottom: 20px;
+        }
+
+        .preference-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .preference-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .preference-card strong {
+            display: block;
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .preference-card span {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .preference-groups {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .preference-group {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .preference-group h3 {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .pref-list {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .pref-empty {
+            color: #999;
+            font-style: italic;
         }
 
         .games-list {
@@ -324,6 +437,16 @@
             background: #ff6b6b;
             color: white;
         }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+
+            .preference-cards {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -331,41 +454,83 @@
         <h1>🎮 Game Selector</h1>
         <div class="user-id" id="userId"></div>
 
-        <div class="input-section">
-            <input type="text" id="gameInput" placeholder="Add a game..." />
-            <button onclick="addGame()">Add</button>
-        </div>
-
-        <div class="games-section">
-            <div class="games-list" id="gamesList">
-                <div class="empty-state">Loading...</div>
+        <div class="view-header">
+            <div class="quick-summary" id="quickSummary">Loading your preferences...</div>
+            <div class="view-toggle">
+                <button class="tab-btn active" id="boardTab" onclick="setView('board')">Session Board</button>
+                <button class="tab-btn" id="preferencesTab" onclick="setView('preferences')">My Preferences</button>
             </div>
         </div>
 
-        <div class="spinner" id="spinner">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="90" fill="none" stroke="#f0f0f0" stroke-width="2" />
-                <circle cx="100" cy="100" r="85" fill="none" stroke="#667eea" stroke-width="8"
-                        stroke-dasharray="0 2000" stroke-linecap="round" style="animation: spin 2s linear infinite;" />
-                <circle cx="100" cy="100" r="70" fill="white" stroke="#ddd" stroke-width="2" />
-            </svg>
-            <style>
-                @keyframes spin {
-                    from { stroke-dasharray: 0 2000; }
-                    to { stroke-dasharray: 2000 2000; }
-                }
-            </style>
+        <div class="view active" id="boardView">
+            <div class="input-section">
+                <input type="text" id="gameInput" placeholder="Add a game..." />
+                <button onclick="addGame()">Add</button>
+            </div>
+
+            <div class="games-section">
+                <div class="games-list" id="gamesList">
+                    <div class="empty-state">Loading...</div>
+                </div>
+            </div>
+
+            <div class="spinner" id="spinner">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="#f0f0f0" stroke-width="2" />
+                    <circle cx="100" cy="100" r="85" fill="none" stroke="#667eea" stroke-width="8"
+                            stroke-dasharray="0 2000" stroke-linecap="round" style="animation: spin 2s linear infinite;" />
+                    <circle cx="100" cy="100" r="70" fill="white" stroke="#ddd" stroke-width="2" />
+                </svg>
+                <style>
+                    @keyframes spin {
+                        from { stroke-dasharray: 0 2000; }
+                        to { stroke-dasharray: 2000 2000; }
+                    }
+                </style>
+            </div>
+
+            <button class="spin-button" id="spinBtn" onclick="spinWheel()" disabled>
+                Spin the Wheel! 🎡
+            </button>
+
+            <div class="result" id="result">
+                <h2>You should play:</h2>
+                <p id="selectedGame"></p>
+                <div class="button-group">
+                    <button onclick="spinWheel()">Spin Again</button>
+                </div>
+            </div>
         </div>
 
-        <button class="spin-button" id="spinBtn" onclick="spinWheel()" disabled>
-            Spin the Wheel! 🎡
-        </button>
+        <div class="view preferences-view" id="preferencesView">
+            <div class="preference-cards">
+                <div class="preference-card">
+                    <strong id="likesCount">0</strong>
+                    <span>Would Love To Play</span>
+                </div>
+                <div class="preference-card">
+                    <strong id="willingCount">0</strong>
+                    <span>Willing To Play</span>
+                </div>
+                <div class="preference-card">
+                    <strong id="skipCount">0</strong>
+                    <span>Not Feeling It</span>
+                </div>
+            </div>
 
-        <div class="result" id="result">
-            <h2>You should play:</h2>
-            <p id="selectedGame"></p>
-            <div class="button-group">
-                <button onclick="spinWheel()">Spin Again</button>
+            <div class="preference-groups">
+                <div class="preference-group">
+                    <h3>👍 Would Love To Play</h3>
+                    <div class="pref-list" id="likesList"></div>
+                </div>
+                <div class="preference-group">
+                    <h3>🙂 Willing To Play</h3>
+                    <div class="pref-list" id="willingList"></div>
+                </div>
+                <div class="preference-group">
+                    <h3>👎 Not Feeling It</h3>
+                    <div class="pref-list" id="skipList"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -377,6 +542,7 @@
         let gameVotes = {};
         let userId;
         let ws;
+        let activeView = 'board';
         let apiUrl = 'https://gamer-sync-app.jmandli-dev.workers.dev';
 
         // Generate or load user ID
@@ -387,7 +553,13 @@
                 localStorage.setItem('userId', stored);
             }
             userId = stored;
-            document.getElementById('userId').textContent = `You: ${userId}`;
+            updateUserIdentityLabel();
+        }
+
+        function updateUserIdentityLabel() {
+            const isEmailIdentity = userId && userId.includes('@');
+            const label = isEmailIdentity ? `Signed in as: ${userId}` : `Guest: ${userId}`;
+            document.getElementById('userId').textContent = label;
         }
 
         function connect() {
@@ -400,13 +572,18 @@
 
             ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
-                if (msg.type === 'update') {
+                if (msg.type === 'identity' && msg.userId) {
+                    userId = msg.userId;
+                    updateUserIdentityLabel();
+                    renderPreferences();
+                } else if (msg.type === 'update') {
                     games = msg.data.games;
                     gameVotes = {};
                     games.forEach((game) => {
                         gameVotes[game.id] = game.votes;
                     });
                     renderGames();
+                    renderPreferences();
                 }
             };
 
@@ -435,7 +612,7 @@
             const input = document.getElementById('gameInput');
             const name = input.value.trim();
 
-            if (!name) return;
+            if (!name || !ws || ws.readyState !== WebSocket.OPEN) return;
 
             ws.send(JSON.stringify({ type: 'addGame', name }));
             input.value = '';
@@ -443,13 +620,65 @@
         }
 
         function removeGame(gameId) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
             ws.send(JSON.stringify({ type: 'removeGame', gameId }));
         }
 
         function vote(gameId, value) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
             const currentVote = gameVotes[gameId]?.[userId] || 0;
             const newValue = currentVote === value ? 0 : value;
             ws.send(JSON.stringify({ type: 'vote', gameId, userId, value: newValue }));
+        }
+
+        function setView(viewName) {
+            activeView = viewName;
+            document.getElementById('boardView').classList.toggle('active', viewName === 'board');
+            document.getElementById('preferencesView').classList.toggle('active', viewName === 'preferences');
+            document.getElementById('boardTab').classList.toggle('active', viewName === 'board');
+            document.getElementById('preferencesTab').classList.toggle('active', viewName === 'preferences');
+        }
+
+        function renderPreferenceList(elementId, list) {
+            const target = document.getElementById(elementId);
+            if (list.length === 0) {
+                target.innerHTML = '<span class="pref-empty">None yet</span>';
+                return;
+            }
+
+            target.textContent = list.map((game) => game.name).join(', ');
+        }
+
+        function renderPreferences() {
+            if (!userId) {
+                return;
+            }
+
+            const likes = [];
+            const willing = [];
+            const skip = [];
+
+            games.forEach((game) => {
+                const voteValue = gameVotes[game.id]?.[userId] || 0;
+                if (voteValue === 1) {
+                    likes.push(game);
+                } else if (voteValue === -1) {
+                    skip.push(game);
+                } else {
+                    willing.push(game);
+                }
+            });
+
+            document.getElementById('likesCount').textContent = likes.length;
+            document.getElementById('willingCount').textContent = willing.length;
+            document.getElementById('skipCount').textContent = skip.length;
+
+            renderPreferenceList('likesList', likes);
+            renderPreferenceList('willingList', willing);
+            renderPreferenceList('skipList', skip);
+
+            document.getElementById('quickSummary').textContent =
+                `At a glance: ${likes.length} love, ${willing.length} willing, ${skip.length} skip.`;
         }
 
         function getVoteScore(gameId) {
@@ -464,6 +693,7 @@
             if (games.length === 0) {
                 list.innerHTML = '<div class="empty-state">Add some games to get started!</div>';
                 spinBtn.disabled = true;
+                renderPreferences();
                 return;
             }
 
@@ -537,6 +767,7 @@
 
         // Initialize
         initUserId();
+        setView(activeView);
         connect();
     </script>
 </body>
