@@ -5,6 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "deploy": "wrangler deploy",
+    "deploy:api": "wrangler deploy",
+    "deploy:pages": "wrangler pages deploy . --project-name gamer-sync-app",
+    "deploy:all": "npm run deploy:api && npm run deploy:pages",
     "dev": "wrangler dev"
   },
   "dependencies": {}
